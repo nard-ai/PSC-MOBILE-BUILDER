@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Ordering App",
+    "name": "KIOSK POS",
     "slug": "WebAppWrapperExpo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,21 +23,23 @@
     },
     "android": {
       "package": "com.psckiosk.WebAppWrapperExpo",
-      "label": "Ordering App",
-      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/pscLogo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "versionCode": 11,
+      "label": "KIOSK POS",
+      "usesCleartextTraffic": true,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"]
     },
     "web": {
       "favicon": "./assets/pscLogo.png"
     },
+    "owner": "narddddddddddddd",
     "extra": {
       "eas": {
-        "projectId": "5c7de5d4-a96b-4a4c-86d7-c09dc4af9a4a"
+        "projectId": "54487807-94d3-4533-b4d0-a2440778ad45"
       }
-    },
-    "owner": "partnersolutions"
+    }
   }
 }

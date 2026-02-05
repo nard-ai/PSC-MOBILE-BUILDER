@@ -1,0 +1,73 @@
+# Exclude common files that shouldn't be in Docker build context
+
+# Build outputs
+build/
+uploads/
+logs/
+dist/
+*.log
+
+# Dependencies
+node_modules/
+*.tgz
+*.tar.gz
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Android build files
+android/.gradle/
+android/build/
+android/app/build/
+
+# Expo
+.expo/
+.expo-shared/
+
+# React Native
+.react-native/
+
+# Testing
+coverage/
+*.test.js
