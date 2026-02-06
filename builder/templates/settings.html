@@ -1,159 +1,168 @@
-{% extends "base.html" %}
-
-{% block title %}Settings - PSC Mobile Builder{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Settings - PSC Mobile Builder{%
+endblock %} {% block content %}
 <div class="settings-container">
-    <section class="card">
-        <h2 class="card-header">EXPO_TOKEN Configuration</h2>
-        
-        <form id="tokenForm" class="settings-form">
-            <div class="form-group">
-                <label for="expo_token">EXPO_TOKEN</label>
-                <div class="input-with-button">
-                    <input type="password" 
-                           id="expo_token" 
-                           name="expo_token" 
-                           value="{{ expo_token }}"
-                           placeholder="Your Expo access token">
-                    <button type="button" class="btn btn-secondary" onclick="togglePassword('expo_token')">
-                        Show
-                    </button>
-                </div>
-                <small>
-                    Get your token from 
-                    <a href="https://expo.dev/accounts/[account]/settings/access-tokens" target="_blank">
-                        expo.dev Account Settings
-                    </a>
-                </small>
-            </div>
+  <section class="card">
+    <h2 class="card-header">EXPO_TOKEN Configuration</h2>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    Save Token
-                </button>
-            </div>
-        </form>
-    </section>
-
-    <section class="card">
-        <h2 class="card-header">Runtime Information</h2>
-        
-        <div class="info-grid">
-            <div class="info-item">
-                <label>Python</label>
-                <code id="pythonPath">Checking...</code>
-            </div>
-            <div class="info-item">
-                <label>Node.js</label>
-                <code id="nodePath">Checking...</code>
-            </div>
-            <div class="info-item">
-                <label>EAS CLI</label>
-                <code id="easPath">Checking...</code>
-            </div>
-            <div class="info-item">
-                <label>Project Directory</label>
-                <code id="projectDir">Checking...</code>
-            </div>
+    <form id="tokenForm" class="settings-form">
+      <div class="form-group">
+        <label for="expo_token">EXPO_TOKEN</label>
+        <div class="input-with-button">
+          <input
+            type="password"
+            id="expo_token"
+            name="expo_token"
+            value="{{ expo_token }}"
+            placeholder="Your Expo access token"
+          />
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="togglePassword('expo_token')"
+          >
+            Show
+          </button>
         </div>
-    </section>
+        <small>
+          Get your token from
+          <a
+            href="https://expo.dev/accounts/[account]/settings/access-tokens"
+            target="_blank"
+          >
+            expo.dev Account Settings
+          </a>
+        </small>
+      </div>
 
-    <section class="card">
-        <h2 class="card-header">About</h2>
-        
-        <div class="about-info">
-            <p><strong>PSC Mobile Builder</strong> - Portable Edition v1.0</p>
-            <p>
-                A tool for building Android WebView wrapper apps using Expo EAS.
-                This portable version includes embedded Python and Node.js runtimes.
-            </p>
-            <p>
-                <strong>How it works:</strong>
-            </p>
-            <ol>
-                <li>Configure your web app URL and app name</li>
-                <li>Optionally upload a custom icon</li>
-                <li>Click "Build Android App"</li>
-                <li>Wait for EAS cloud build to complete (usually 5-10 minutes)</li>
-                <li>Download your APK</li>
-            </ol>
-        </div>
-    </section>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Token</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2 class="card-header">Runtime Information</h2>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Python</label>
+        <code id="pythonPath">Checking...</code>
+      </div>
+      <div class="info-item">
+        <label>Node.js</label>
+        <code id="nodePath">Checking...</code>
+      </div>
+      <div class="info-item">
+        <label>EAS CLI</label>
+        <code id="easPath">Checking...</code>
+      </div>
+      <div class="info-item">
+        <label>Project Directory</label>
+        <code id="projectDir">Checking...</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="card-header">About</h2>
+
+    <div class="about-info">
+      <p><strong>PSC Mobile Builder</strong> - Portable Edition v1.0</p>
+      <p>
+        A tool for building Android WebView wrapper apps using Expo EAS. This
+        portable version includes embedded Python and Node.js runtimes.
+      </p>
+      <p>
+        <strong>How it works:</strong>
+      </p>
+      <ol>
+        <li>Configure your web app URL and app name</li>
+        <li>Optionally upload a custom icon</li>
+        <li>Click "Build Android App"</li>
+        <li>Wait for EAS cloud build to complete (usually 5-10 minutes)</li>
+        <li>Download your APK</li>
+      </ol>
+    </div>
+  </section>
 </div>
 
 <script>
-function togglePassword(inputId) {
+  function togglePassword(inputId) {
     const input = document.getElementById(inputId);
     const btn = event.target;
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = 'Hide';
+    if (input.type === "password") {
+      input.type = "text";
+      btn.textContent = "Hide";
     } else {
-        input.type = 'password';
-        btn.textContent = 'Show';
+      input.type = "password";
+      btn.textContent = "Show";
     }
-}
+  }
 
-document.getElementById('tokenForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const token = document.getElementById('expo_token').value.trim();
-    
-    try {
-        const response = await fetch('/api/save-token', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({token: token})
+  document
+    .getElementById("tokenForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const token = document.getElementById("expo_token").value.trim();
+
+      try {
+        const response = await fetch("/api/save-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: token }),
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('Token saved!', 'success');
-        } else {
-            showNotification(result.error || 'Failed to save', 'error');
-        }
-    } catch (err) {
-        showNotification('Error: ' + err.message, 'error');
-    }
-});
 
-// Show notification
-function showNotification(message, type) {
-    const notification = document.createElement('div');
+        const result = await response.json();
+
+        if (result.success) {
+          showNotification("Token saved!", "success");
+        } else {
+          showNotification(result.error || "Failed to save", "error");
+        }
+      } catch (err) {
+        showNotification("Error: " + err.message, "error");
+      }
+    });
+
+  // Show notification
+  function showNotification(message, type) {
+    const notification = document.createElement("div");
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
-        notification.classList.add('fade-out');
-        setTimeout(() => notification.remove(), 300);
+      notification.classList.add("fade-out");
+      setTimeout(() => notification.remove(), 300);
     }, 3000);
-}
+  }
 
-// Load runtime info
-async function loadRuntimeInfo() {
+  // Load runtime info
+  async function loadRuntimeInfo() {
     try {
-        const response = await fetch('/api/validate');
-        const data = await response.json();
-        
-        // This is a simplified display - could be enhanced
-        document.getElementById('pythonPath').textContent = 'runtime/python/python.exe';
-        document.getElementById('nodePath').textContent = 'runtime/node/node.exe';
-        document.getElementById('easPath').textContent = 'runtime/node/eas.cmd';
-        document.getElementById('projectDir').textContent = window.location.origin;
-        
-        if (data.runtime_issues && data.runtime_issues.length > 0) {
-            document.getElementById('pythonPath').textContent = data.runtime_issues.join(', ');
-        }
-    } catch (err) {
-        console.error('Error loading runtime info:', err);
-    }
-}
+      const response = await fetch("/api/validate");
+      const data = await response.json();
 
-document.addEventListener('DOMContentLoaded', () => {
+      // This is a simplified display - could be enhanced
+      document.getElementById("pythonPath").textContent =
+        "runtime/python/python.exe";
+      document.getElementById("nodePath").textContent = "runtime/node/node.exe";
+      document.getElementById("easPath").textContent = "runtime/node/eas.cmd";
+      document.getElementById("projectDir").textContent =
+        window.location.origin;
+
+      if (data.runtime_issues && data.runtime_issues.length > 0) {
+        document.getElementById("pythonPath").textContent =
+          data.runtime_issues.join(", ");
+      }
+    } catch (err) {
+      console.error("Error loading runtime info:", err);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
     loadRuntimeInfo();
-});
+  });
 </script>
 {% endblock %}

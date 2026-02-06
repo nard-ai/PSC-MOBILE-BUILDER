@@ -32,11 +32,13 @@ Run these scripts in order from the project root directory:
 ## What Gets Installed
 
 ### runtime/python/ (~100 MB)
+
 - WinPython 3.11.8 (portable Python with tkinter)
 - requests (HTTP library)
 - pillow (image processing)
 
 ### runtime/node/ (~170 MB with packages)
+
 - Node.js v20.11.0 (LTS)
 - npm
 - eas-cli (Expo Application Services)
@@ -45,27 +47,31 @@ Run these scripts in order from the project root directory:
 ## Troubleshooting
 
 ### PowerShell Execution Policy Error
+
 If you get an error about execution policy, run:
+
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 ### Download Fails
+
 If automatic download fails, the script will show manual download URLs. Download the files manually and extract to the appropriate folders.
 
 ### "Not Recognized" Errors
+
 Make sure you're running from the project root directory, not from inside the setup folder.
 
 ## Scripts Description
 
-| Script | Purpose |
-|--------|---------|
-| `download_python.ps1` | Downloads WinPython portable |
-| `download_node.ps1` | Downloads Node.js portable |
-| `install_pip_packages.ps1` | Installs Python packages |
-| `install_npm_packages.ps1` | Installs EAS CLI and Expo CLI |
-| `verify_setup.ps1` | Verifies all installations |
-| `create_package.ps1` | Creates distributable ZIP (Phase 5) |
+| Script                     | Purpose                             |
+| -------------------------- | ----------------------------------- |
+| `download_python.ps1`      | Downloads WinPython portable        |
+| `download_node.ps1`        | Downloads Node.js portable          |
+| `install_pip_packages.ps1` | Installs Python packages            |
+| `install_npm_packages.ps1` | Installs EAS CLI and Expo CLI       |
+| `verify_setup.ps1`         | Verifies all installations          |
+| `create_package.ps1`       | Creates distributable ZIP (Phase 5) |
 
 ## After Setup
 

@@ -4,10 +4,10 @@
     "slug": "WebAppWrapperExpo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/pscLogo.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/pscLogo.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -24,10 +24,10 @@
     "android": {
       "package": "com.psckiosk.WebAppWrapperExpo",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/pscLogo.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "versionCode": 12,
+      "versionCode": 13,
       "label": "KIOSK POS",
       "usesCleartextTraffic": true,
       "permissions": [
