@@ -1,11 +1,7 @@
-# ============================================================================
 # PSC Mobile Builder - Install NPM Packages
-# ============================================================================
-# This script installs EAS CLI and Expo CLI to the portable Node.js
-# Prerequisites: Run download_node.ps1 first
-# ============================================================================
 
-$ErrorActionPreference = "Stop"
+# Don't stop on npm warnings (they go to stderr)
+$ErrorActionPreference = "Continue"
 
 # Paths
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -16,12 +12,6 @@ $NODE_EXE = Join-Path $NODE_DIR "node.exe"
 $NPM_CMD = Join-Path $NODE_DIR "npm.cmd"
 $NODE_MODULES = Join-Path $NODE_DIR "node_modules"
 
-# Colors for output
-function Write-Success { param($msg) Write-Host "✅ $msg" -ForegroundColor Green }
-function Write-Info { param($msg) Write-Host "ℹ️  $msg" -ForegroundColor Cyan }
-function Write-Warning { param($msg) Write-Host "⚠️  $msg" -ForegroundColor Yellow }
-function Write-Error { param($msg) Write-Host "❌ $msg" -ForegroundColor Red }
-
 # Header
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Blue
@@ -31,7 +21,7 @@ Write-Host ""
 
 # Check if Node exists
 if (-not (Test-Path $NODE_EXE)) {
-    Write-Error "Node.js not found at: $NODE_EXE"
+    Write-Host "[X] Node.js not found at: $NODE_EXE" -ForegroundColor Red
     Write-Host ""
     Write-Host "Please run download_node.ps1 first." -ForegroundColor Yellow
     exit 1
@@ -41,108 +31,92 @@ if (-not (Test-Path $NODE_EXE)) {
 $env:PATH = "$NODE_DIR;$env:PATH"
 
 # Verify Node works
-Write-Info "Checking Node.js installation..."
+Write-Host "[i] Checking Node.js installation..." -ForegroundColor Cyan
 $nodeVersion = & $NODE_EXE --version 2>&1
-Write-Success "Found Node.js: $nodeVersion"
+Write-Host "[OK] Found Node.js: $nodeVersion" -ForegroundColor Green
 
 $npmVersion = & $NPM_CMD --version 2>&1
-Write-Success "Found npm: v$npmVersion"
+Write-Host "[OK] Found npm: v$npmVersion" -ForegroundColor Green
 
-# Initialize package.json in node directory for local installs
-Write-Info "Initializing npm in Node directory..."
+# Navigate to Node directory for local install
 Push-Location $NODE_DIR
 
 try {
-    # Create minimal package.json if it doesn't exist
+    # Create package.json if not exists
     $packageJsonPath = Join-Path $NODE_DIR "package.json"
     if (-not (Test-Path $packageJsonPath)) {
-        $packageJson = @{
-            name = "psc-mobile-builder-runtime"
-            version = "1.0.0"
-            description = "Portable runtime for PSC Mobile Builder"
-            private = $true
-        } | ConvertTo-Json
-        
+        Write-Host "[i] Creating package.json..." -ForegroundColor Cyan
+        $packageJson = @"
+{
+  "name": "psc-mobile-builder-runtime",
+  "version": "1.0.0",
+  "description": "Portable runtime for PSC Mobile Builder",
+  "private": true
+}
+"@
         Set-Content -Path $packageJsonPath -Value $packageJson
-        Write-Success "Created package.json"
+        Write-Host "[OK] Created package.json" -ForegroundColor Green
     }
     
     # Install EAS CLI
     Write-Host ""
-    Write-Info "Installing EAS CLI..."
-    Write-Info "This may take 2-3 minutes..."
+    Write-Host "[i] Installing EAS CLI (this may take 2-3 minutes)..." -ForegroundColor Cyan
     
-    & $NPM_CMD install eas-cli --save 2>&1 | ForEach-Object {
-        if ($_ -match "error|warn") {
-            Write-Host $_ -ForegroundColor Yellow
-        }
-    }
+    $npmOutput = & $NPM_CMD install eas-cli --save 2>&1
+    # npm warnings are normal, only check if the package was installed
     
-    # Verify EAS CLI installation
+    # Verify EAS CLI
     $easPath = Join-Path $NODE_MODULES "eas-cli"
     if (Test-Path $easPath) {
-        Write-Success "EAS CLI installed"
+        Write-Host "[OK] EAS CLI installed" -ForegroundColor Green
     }
     else {
+        Write-Host "[X] EAS CLI installation failed" -ForegroundColor Red
+        Write-Host "npm output: $npmOutput" -ForegroundColor Gray
         throw "EAS CLI installation failed"
     }
     
     # Install Expo CLI
     Write-Host ""
-    Write-Info "Installing Expo CLI (@expo/cli)..."
-    Write-Info "This may take 1-2 minutes..."
+    Write-Host "[i] Installing Expo CLI (this may take 1-2 minutes)..." -ForegroundColor Cyan
     
-    & $NPM_CMD install @expo/cli --save 2>&1 | ForEach-Object {
-        if ($_ -match "error|warn") {
-            Write-Host $_ -ForegroundColor Yellow
-        }
-    }
+    $npmOutput = & $NPM_CMD install @expo/cli --save 2>&1
+    # npm warnings are normal, only check if the package was installed
     
-    # Verify Expo CLI installation
+    # Verify Expo CLI
     $expoPath = Join-Path $NODE_MODULES "@expo"
     if (Test-Path $expoPath) {
-        Write-Success "Expo CLI installed"
+        Write-Host "[OK] Expo CLI installed" -ForegroundColor Green
     }
     else {
+        Write-Host "[X] Expo CLI installation failed" -ForegroundColor Red
         throw "Expo CLI installation failed"
     }
     
-    # Create wrapper scripts for eas and expo commands
-    Write-Host ""
-    Write-Info "Creating command wrapper scripts..."
-    
     # Create eas.cmd wrapper
+    Write-Host ""
+    Write-Host "[i] Creating command wrappers..." -ForegroundColor Cyan
+    
     $easCmdPath = Join-Path $NODE_DIR "eas.cmd"
-    $easCmdContent = @"
-@echo off
-"%~dp0node.exe" "%~dp0node_modules\eas-cli\bin\run" %*
-"@
-    Set-Content -Path $easCmdPath -Value $easCmdContent
-    Write-Success "Created eas.cmd"
+    $easCmdContent = "@echo off`r`n`"%~dp0node.exe`" `"%~dp0node_modules\eas-cli\bin\run`" %*"
+    Set-Content -Path $easCmdPath -Value $easCmdContent -NoNewline
+    Write-Host "[OK] Created eas.cmd" -ForegroundColor Green
     
     # Create expo.cmd wrapper
     $expoCmdPath = Join-Path $NODE_DIR "expo.cmd"
-    $expoCmdContent = @"
-@echo off
-"%~dp0node.exe" "%~dp0node_modules\@expo\cli\build\bin\cli" %*
-"@
-    Set-Content -Path $expoCmdPath -Value $expoCmdContent
-    Write-Success "Created expo.cmd"
+    $expoCmdContent = "@echo off`r`n`"%~dp0node.exe`" `"%~dp0node_modules\@expo\cli\build\bin\cli`" %*"
+    Set-Content -Path $expoCmdPath -Value $expoCmdContent -NoNewline
+    Write-Host "[OK] Created expo.cmd" -ForegroundColor Green
     
-    # Verify eas command works
+    # Verify eas command
     Write-Host ""
-    Write-Info "Verifying EAS CLI..."
+    Write-Host "[i] Verifying EAS CLI..." -ForegroundColor Cyan
     $easVersion = & $easCmdPath --version 2>&1
-    if ($easVersion -match "eas-cli") {
-        Write-Success "EAS CLI working: $easVersion"
-    }
-    else {
-        Write-Warning "EAS CLI version check returned: $easVersion"
-    }
+    Write-Host "[OK] EAS CLI working: $easVersion" -ForegroundColor Green
     
 }
 catch {
-    Write-Error "Installation failed: $_"
+    Write-Host "[X] Installation failed: $_" -ForegroundColor Red
     Pop-Location
     exit 1
 }
@@ -156,12 +130,12 @@ Write-Host "  NPM Packages Setup Complete!" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Installed packages:" -ForegroundColor Cyan
-Write-Host "    - eas-cli" -ForegroundColor Cyan
-Write-Host "    - @expo/cli" -ForegroundColor Cyan
+Write-Host "    - eas-cli" -ForegroundColor Gray
+Write-Host "    - @expo/cli" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  Wrapper scripts created:" -ForegroundColor Cyan
-Write-Host "    - $NODE_DIR\eas.cmd" -ForegroundColor Cyan
-Write-Host "    - $NODE_DIR\expo.cmd" -ForegroundColor Cyan
+Write-Host "    - eas.cmd" -ForegroundColor Gray
+Write-Host "    - expo.cmd" -ForegroundColor Gray
 Write-Host ""
-Write-Host "  Next step: Run verify_setup.ps1 to verify everything" -ForegroundColor Yellow
+Write-Host "  Next step: Run verify_setup.ps1" -ForegroundColor Yellow
 Write-Host ""

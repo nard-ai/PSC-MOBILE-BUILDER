@@ -47,3 +47,9 @@ app.json.backup*
 # EAS
 .eas/
 eas-build-logs/
+
+# Portable Installation - runtime binaries (large files, downloaded by setup scripts)
+runtime/
+
+# Build outputs
+builds/

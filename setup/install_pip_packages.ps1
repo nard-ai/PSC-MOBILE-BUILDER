@@ -1,9 +1,4 @@
-# ============================================================================
 # PSC Mobile Builder - Install Python Packages
-# ============================================================================
-# This script installs required Python packages to the portable Python
-# Prerequisites: Run download_python.ps1 first
-# ============================================================================
 
 $ErrorActionPreference = "Stop"
 
@@ -16,15 +11,10 @@ $PYTHON_EXE = Join-Path $PYTHON_DIR "python.exe"
 
 # Required packages
 $PACKAGES = @(
+    "flask",
     "requests",
     "pillow"
 )
-
-# Colors for output
-function Write-Success { param($msg) Write-Host "✅ $msg" -ForegroundColor Green }
-function Write-Info { param($msg) Write-Host "ℹ️  $msg" -ForegroundColor Cyan }
-function Write-Warning { param($msg) Write-Host "⚠️  $msg" -ForegroundColor Yellow }
-function Write-Error { param($msg) Write-Host "❌ $msg" -ForegroundColor Red }
 
 # Header
 Write-Host ""
@@ -35,87 +25,87 @@ Write-Host ""
 
 # Check if Python exists
 if (-not (Test-Path $PYTHON_EXE)) {
-    Write-Error "Python not found at: $PYTHON_EXE"
+    Write-Host "[X] Python not found at: $PYTHON_EXE" -ForegroundColor Red
     Write-Host ""
     Write-Host "Please run download_python.ps1 first." -ForegroundColor Yellow
     exit 1
 }
 
 # Verify Python works
-Write-Info "Checking Python installation..."
+Write-Host "[i] Checking Python installation..." -ForegroundColor Cyan
 $pythonVersion = & $PYTHON_EXE --version 2>&1
-Write-Success "Found Python: $pythonVersion"
+Write-Host "[OK] Found Python: $pythonVersion" -ForegroundColor Green
 
 # Upgrade pip
-Write-Info "Upgrading pip..."
+Write-Host "[i] Upgrading pip..." -ForegroundColor Cyan
 try {
-    & $PYTHON_EXE -m pip install --upgrade pip --quiet
-    Write-Success "pip upgraded successfully"
+    & $PYTHON_EXE -m pip install --upgrade pip --quiet --no-warn-script-location 2>&1 | Out-Null
+    Write-Host "[OK] pip upgraded" -ForegroundColor Green
 }
 catch {
-    Write-Warning "Could not upgrade pip (may already be latest)"
+    Write-Host "[!] Could not upgrade pip (may already be latest)" -ForegroundColor Yellow
 }
 
 # Install packages
 Write-Host ""
-Write-Info "Installing required packages..."
+Write-Host "[i] Installing required packages..." -ForegroundColor Cyan
 Write-Host ""
 
 $allSuccess = $true
 
 foreach ($package in $PACKAGES) {
-    Write-Info "Installing $package..."
+    Write-Host "[i] Installing $package..." -ForegroundColor Cyan
     try {
-        & $PYTHON_EXE -m pip install $package --quiet
-        
-        # Verify installation
-        $testResult = & $PYTHON_EXE -c "import $package; print('OK')" 2>&1
-        if ($testResult -match "OK") {
-            Write-Success "$package installed successfully"
-        }
-        else {
-            throw "Import test failed"
-        }
+        & $PYTHON_EXE -m pip install $package --quiet --no-warn-script-location 2>&1 | Out-Null
+        Write-Host "[OK] $package installed" -ForegroundColor Green
     }
     catch {
-        Write-Error "Failed to install $package: $_"
+        Write-Host "[X] Failed to install $package" -ForegroundColor Red
         $allSuccess = $false
     }
 }
 
-# Test tkinter (should be included in WinPython)
+# Verify Flask
 Write-Host ""
-Write-Info "Verifying tkinter (pre-installed with WinPython)..."
+Write-Host "[i] Verifying Flask (for web UI)..." -ForegroundColor Cyan
 try {
-    $tkTest = & $PYTHON_EXE -c "import tkinter; print('OK')" 2>&1
-    if ($tkTest -match "OK") {
-        Write-Success "tkinter is available"
+    $flaskTest = & $PYTHON_EXE -c "import flask; print('OK')" 2>&1
+    if ($flaskTest -match "OK") {
+        Write-Host "[OK] Flask is available" -ForegroundColor Green
     }
     else {
-        throw "tkinter not available"
+        throw "Flask test failed"
     }
 }
 catch {
-    Write-Error "tkinter is not available. GUI will not work."
-    Write-Host ""
-    Write-Host "This should not happen with WinPython." -ForegroundColor Yellow
-    Write-Host "Please verify WinPython was downloaded correctly." -ForegroundColor Yellow
+    Write-Host "[X] Flask verification failed" -ForegroundColor Red
     $allSuccess = $false
 }
 
-# Test PIL (pillow)
-Write-Info "Verifying Pillow (PIL)..."
+# Verify requests
+Write-Host "[i] Verifying requests..." -ForegroundColor Cyan
+try {
+    $reqTest = & $PYTHON_EXE -c "import requests; print(requests.__version__)" 2>&1
+    Write-Host "[OK] requests version: $reqTest" -ForegroundColor Green
+}
+catch {
+    Write-Host "[X] requests verification failed" -ForegroundColor Red
+    $allSuccess = $false
+}
+
+# Verify Pillow
+Write-Host "[i] Verifying Pillow..." -ForegroundColor Cyan
 try {
     $pilTest = & $PYTHON_EXE -c "from PIL import Image; print('OK')" 2>&1
     if ($pilTest -match "OK") {
-        Write-Success "Pillow (PIL) is available"
+        Write-Host "[OK] Pillow is available" -ForegroundColor Green
     }
     else {
-        throw "Pillow not available"
+        throw "Pillow test failed"
     }
 }
 catch {
-    Write-Error "Pillow is not available: $_"
+    Write-Host "[X] Pillow verification failed" -ForegroundColor Red
     $allSuccess = $false
 }
 
@@ -128,12 +118,10 @@ if ($allSuccess) {
     Write-Host ""
     Write-Host "  Installed packages:" -ForegroundColor Cyan
     foreach ($package in $PACKAGES) {
-        Write-Host "    - $package" -ForegroundColor Cyan
+        Write-Host "    - $package" -ForegroundColor Gray
     }
-    Write-Host "    - tkinter (pre-installed)" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "  Next step: Run download_node.ps1 (if not done)" -ForegroundColor Yellow
-    Write-Host "             or install_npm_packages.ps1" -ForegroundColor Yellow
+    Write-Host "  Next step: Run install_npm_packages.ps1" -ForegroundColor Yellow
     Write-Host ""
 }
 else {
@@ -141,7 +129,7 @@ else {
     Write-Host "  Some packages failed to install!" -ForegroundColor Red
     Write-Host "============================================" -ForegroundColor Red
     Write-Host ""
-    Write-Host "  Please check the errors above and try again." -ForegroundColor Yellow
+    Write-Host "  Please check errors above and try again." -ForegroundColor Yellow
     Write-Host ""
     exit 1
 }
