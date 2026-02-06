@@ -27,13 +27,13 @@
 
 | Step No. | Task | Description | Status |
 |----------|------|-------------|--------|
-| 1.1 | Create setup folder structure | Create `setup/` folder for all setup scripts | ⏳ Not Started |
-| 1.2 | download_python.ps1 | Script to download WinPython portable (~100 MB) | ⏳ Not Started |
-| 1.3 | download_node.ps1 | Script to download Node.js portable (~70 MB) | ⏳ Not Started |
-| 1.4 | install_pip_packages.ps1 | Install requests, pillow to portable Python | ⏳ Not Started |
-| 1.5 | install_npm_packages.ps1 | Install eas-cli, @expo/cli to portable Node | ⏳ Not Started |
-| 1.6 | verify_setup.ps1 | Verify all components installed correctly | ⏳ Not Started |
-| 1.7 | Test Phase 1 | Run all scripts, verify runtime/ folder created | ⏳ Not Started |
+| 1.1 | Create setup folder structure | Create `setup/` folder for all setup scripts | ✅ Completed |
+| 1.2 | download_python.ps1 | Script to download WinPython portable (~100 MB) | ✅ Completed |
+| 1.3 | download_node.ps1 | Script to download Node.js portable (~70 MB) | ✅ Completed |
+| 1.4 | install_pip_packages.ps1 | Install requests, pillow to portable Python | ✅ Completed |
+| 1.5 | install_npm_packages.ps1 | Install eas-cli, @expo/cli to portable Node | ✅ Completed |
+| 1.6 | verify_setup.ps1 | Verify all components installed correctly | ✅ Completed |
+| 1.7 | Test Phase 1 | Run all scripts, verify runtime/ folder created | 🔄 In Progress |
 
 ---
 

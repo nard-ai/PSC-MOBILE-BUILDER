@@ -27,10 +27,14 @@
         "foregroundImage": "./assets/pscLogo.png",
         "backgroundColor": "#ffffff"
       },
-      "versionCode": 11,
+      "versionCode": 12,
       "label": "KIOSK POS",
       "usesCleartextTraffic": true,
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"]
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFI_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/pscLogo.png"

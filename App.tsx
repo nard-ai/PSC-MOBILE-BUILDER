@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BackHandler, Alert, SafeAreaView, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-const APP_URL = 'http://192.168.1.157/samplekiosk/';
+const APP_URL = 'http://192.168.0.149/samplekiosk/';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
