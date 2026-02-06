@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Build - PSC Mobile Builder{% endblock %}
+
+{% block content %}
+{% if runtime_issues %}
+<div class="alert alert-warning">
+    <strong>Runtime Issues:</strong>
+    <ul>
+        {% for issue in runtime_issues %}
+        <li>{{ issue }}</li>
+        {% endfor %}
+    </ul>
+    <p>Run the setup scripts in the <code>setup/</code> folder to fix these issues.</p>
+</div>
+{% endif %}
+
+<div class="build-container">
+    <!-- Configuration Section -->
+    <section class="card">
+        <h2 class="card-header">App Configuration</h2>
+        <form id="configForm" class="config-form">
+            <div class="form-group">
+                <label for="app_url">App URL</label>
+                <input type="text" 
+                       id="app_url" 
+                       name="app_url" 
+                       value="{{ config.app_url }}"
+                       placeholder="https://example.com/your-webapp">
+                <small>The URL of your web application (POS/Kiosk system)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="app_name">App Name</label>
+                <input type="text" 
+                       id="app_name" 
+                       name="app_name" 
+                       value="{{ config.app_name }}"
+                       placeholder="My App">
+                <small>Display name shown on Android home screen</small>
+            </div>
+
+            <div class="form-group">
+                <label for="package_id">Package ID (Optional)</label>
+                <input type="text" 
+                       id="package_id" 
+                       name="package_id" 
+                       value="{{ config.package_id }}"
+                       placeholder="com.company.myapp">
+                <small>Android package identifier (leave blank to keep current)</small>
+            </div>
+
+            <div class="form-group">
+                <label>App Icon</label>
+                <div class="icon-upload">
+                    <div class="icon-preview">
+                        {% if config.icon %}
+                        <img src="/api/icon-preview" alt="Current Icon" id="iconPreview">
+                        {% else %}
+                        <div class="icon-placeholder" id="iconPreview">No icon</div>
+                        {% endif %}
+                    </div>
+                    <div class="icon-controls">
+                        <input type="file" 
+                               id="iconFile" 
+                               accept="image/png"
+                               style="display: none;"
+                               onchange="uploadIcon(this)">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('iconFile').click()">
+                            Upload Icon
+                        </button>
+                        <small>PNG, 1024x1024 recommended</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    Save Configuration
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Build Section -->
+    <section class="card">
+        <h2 class="card-header">Build Android App</h2>
+        
+        <div class="build-actions">
+            <button type="button" id="buildBtn" class="btn btn-primary btn-lg" onclick="startBuild()">
+                Build Android App
+            </button>
+            <button type="button" id="cancelBtn" class="btn btn-danger" onclick="cancelBuild()" style="display: none;">
+                Cancel Build
+            </button>
+            <button type="button" class="btn btn-warning" onclick="fixGradle()">
+                Fix Gradle Config
+            </button>
+        </div>
+
+        <div id="buildStatus" class="build-status" style="display: none;">
+            <div class="spinner"></div>
+            <span id="statusText">Building...</span>
+        </div>
+
+        <div class="log-container">
+            <h3>Build Logs</h3>
+            <pre id="logArea" class="log-area"></pre>
+        </div>
+
+        <div id="apkDownload" class="apk-download" style="display: none;">
+            <h3>Build Complete!</h3>
+            <p>Your APK is ready:</p>
+            <a id="apkLink" href="#" target="_blank" class="btn btn-success">
+                Download APK
+            </a>
+            <button type="button" class="btn btn-primary" onclick="downloadToLocal()">
+                Save to builds/ folder
+            </button>
+        </div>
+    </section>
+
+    <!-- Previous Builds -->
+    <section class="card">
+        <h2 class="card-header">Downloaded Builds</h2>
+        <div id="buildsList" class="builds-list">
+            <p class="no-builds">Loading...</p>
+        </div>
+    </section>
+</div>
+
+<script>
+// Load previous builds
+async function loadBuilds() {
+    try {
+        const response = await fetch('/api/builds');
+        const builds = await response.json();
+        
+        const container = document.getElementById('buildsList');
+        
+        if (builds.length === 0) {
+            container.innerHTML = '<p class="no-builds">No builds downloaded yet.</p>';
+            return;
+        }
+        
+        let html = '<ul class="builds-list-items">';
+        for (const build of builds) {
+            const date = new Date(build.modified * 1000).toLocaleString();
+            const size = (build.size / (1024 * 1024)).toFixed(2);
+            html += `
+                <li>
+                    <a href="/builds/${build.filename}" download>
+                        ${build.filename}
+                    </a>
+                    <span class="build-info">${size} MB - ${date}</span>
+                </li>
+            `;
+        }
+        html += '</ul>';
+        container.innerHTML = html;
+    } catch (err) {
+        console.error('Error loading builds:', err);
+    }
+}
+
+// Save configuration
+document.getElementById('configForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const data = {
+        app_url: document.getElementById('app_url').value,
+        app_name: document.getElementById('app_name').value,
+        package_id: document.getElementById('package_id').value
+    };
+    
+    try {
+        const response = await fetch('/api/save-config', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Configuration saved!', 'success');
+        } else {
+            showNotification(result.error || 'Failed to save', 'error');
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, 'error');
+    }
+});
+
+// Upload icon
+async function uploadIcon(input) {
+    if (!input.files || !input.files[0]) return;
+    
+    const formData = new FormData();
+    formData.append('icon', input.files[0]);
+    
+    try {
+        const response = await fetch('/api/upload-icon', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Icon updated!', 'success');
+            // Refresh page to show new icon
+            location.reload();
+        } else {
+            showNotification(result.error || 'Failed to upload', 'error');
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, 'error');
+    }
+}
+
+// Start build
+async function startBuild() {
+    const buildBtn = document.getElementById('buildBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const statusDiv = document.getElementById('buildStatus');
+    const logArea = document.getElementById('logArea');
+    
+    buildBtn.disabled = true;
+    cancelBtn.style.display = 'inline-block';
+    statusDiv.style.display = 'flex';
+    logArea.textContent = '';
+    
+    try {
+        const response = await fetch('/api/build/start', {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            showNotification(result.message || result.error, 'error');
+            buildBtn.disabled = false;
+            cancelBtn.style.display = 'none';
+            statusDiv.style.display = 'none';
+            return;
+        }
+        
+        // Start polling for logs
+        pollLogs();
+    } catch (err) {
+        showNotification('Error: ' + err.message, 'error');
+        buildBtn.disabled = false;
+        cancelBtn.style.display = 'none';
+        statusDiv.style.display = 'none';
+    }
+}
+
+// Poll for build logs
+async function pollLogs() {
+    const logArea = document.getElementById('logArea');
+    const statusDiv = document.getElementById('buildStatus');
+    const buildBtn = document.getElementById('buildBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const apkDownload = document.getElementById('apkDownload');
+    
+    try {
+        const response = await fetch('/api/build/logs');
+        const data = await response.json();
+        
+        if (data.logs) {
+            logArea.textContent += data.logs;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        if (data.is_building) {
+            setTimeout(pollLogs, 500);
+        } else {
+            // Build finished
+            statusDiv.style.display = 'none';
+            buildBtn.disabled = false;
+            cancelBtn.style.display = 'none';
+            
+            if (data.apk_url) {
+                apkDownload.style.display = 'block';
+                document.getElementById('apkLink').href = data.apk_url;
+            }
+            
+            loadBuilds();
+        }
+    } catch (err) {
+        console.error('Error polling logs:', err);
+        setTimeout(pollLogs, 1000);
+    }
+}
+
+// Cancel build
+async function cancelBuild() {
+    try {
+        await fetch('/api/build/cancel', {method: 'POST'});
+        showNotification('Build cancelled', 'warning');
+    } catch (err) {
+        console.error('Error cancelling build:', err);
+    }
+}
+
+// Fix Gradle
+async function fixGradle() {
+    try {
+        const response = await fetch('/api/gradle/fix', {method: 'POST'});
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(result.message, 'success');
+        } else {
+            showNotification(result.message || 'Failed to fix Gradle', 'error');
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, 'error');
+    }
+}
+
+// Download APK to local builds folder
+async function downloadToLocal() {
+    const apkUrl = document.getElementById('apkLink').href;
+    
+    try {
+        const response = await fetch('/api/build/download', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url: apkUrl})
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('APK saved to builds folder!', 'success');
+            loadBuilds();
+        } else {
+            showNotification(result.result || 'Download failed', 'error');
+        }
+    } catch (err) {
+        showNotification('Error: ' + err.message, 'error');
+    }
+}
+
+// Show notification
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadBuilds();
+});
+</script>
+{% endblock %}

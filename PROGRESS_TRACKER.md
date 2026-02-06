@@ -12,9 +12,9 @@
 | Phase No. | Features | Description | Progress |
 |-----------|----------|-------------|----------|
 | Phase 1 | Setup Infrastructure | Download scripts for Python & Node.js portable runtimes | ✅ Complete |
-| Phase 2 | Builder Application | Flask Web UI with portable runtimes | 🔄 In Progress |
+| Phase 2 | Builder Application | Flask Web UI with portable runtimes | ✅ Complete |
 | Phase 3 | Project Template | Configure React Native template for portable builds | ⏳ Not Started |
-| Phase 4 | Launcher Scripts | Create START-BUILDER.bat and environment setup | ⏳ Not Started |
+| Phase 4 | Launcher Scripts | Create START-BUILDER.bat and environment setup | 🔄 In Progress |
 | Phase 5 | Packaging | Create final distributable ZIP package | ⏳ Not Started |
 | Phase 6 | Documentation | README, troubleshooting guide, user instructions | ⏳ Not Started |
 
@@ -46,21 +46,36 @@
 
 ## Phase 2: Builder Application
 
-**Status:** 🔄 In Progress  
+**Status:** ✅ Complete  
 **Description:** Create Flask Web UI application that uses portable runtimes. (Changed from Tkinter since Python Embedded lacks tkinter module)
 
 | Step No. | Task | Description | Status |
 |----------|------|-------------|--------|
-| 2.1 | Create builder folder structure | Create `builder/` folder with Flask app structure | ⏳ Not Started |
-| 2.2 | app.py | Main Flask application with routes | ⏳ Not Started |
-| 2.3 | config.py | Configuration module (paths, settings, EXPO_TOKEN handling) | ⏳ Not Started |
-| 2.4 | templates/index.html | Main UI - form for app name, URL, icon, package ID | ⏳ Not Started |
-| 2.5 | static/style.css | Styling for web UI | ⏳ Not Started |
-| 2.6 | project_manager.py | Update App.tsx, app.json with user values | ⏳ Not Started |
-| 2.7 | build_manager.py | Run EAS builds using portable Node/EAS CLI | ⏳ Not Started |
-| 2.8 | APK downloader | Auto-detect APK URL from logs, download to builds/ | ⏳ Not Started |
-| 2.9 | EXPO_TOKEN handling | First-run prompt, store in config file | ⏳ Not Started |
-| 2.10 | Test Phase 2 | Test web UI at http://localhost:5000 | ⏳ Not Started |
+| 2.1 | Create builder folder structure | Create `builder/` folder with Flask app structure | ✅ Completed |
+| 2.2 | app.py | Main Flask application with routes | ✅ Completed |
+| 2.3 | config.py | Configuration module (paths, settings, EXPO_TOKEN handling) | ✅ Completed |
+| 2.4 | templates/index.html | Main UI - form for app name, URL, icon, package ID | ✅ Completed |
+| 2.5 | static/style.css | Styling for web UI | ✅ Completed |
+| 2.6 | project_manager.py | Update App.tsx, app.json with user values | ✅ Completed |
+| 2.7 | build_manager.py | Run EAS builds using portable Node/EAS CLI | ✅ Completed |
+| 2.8 | APK downloader | Auto-detect APK URL from logs, download to builds/ | ✅ Completed |
+| 2.9 | EXPO_TOKEN handling | First-run prompt, store in config file | ✅ Completed |
+| 2.10 | Test Phase 2 | Test web UI at http://localhost:5000 | ✅ Completed |
+
+**Phase 2 Files Created:**
+- `builder/__init__.py` - Package init
+- `builder/config.py` - Configuration management
+- `builder/project_manager.py` - App.tsx/app.json updates
+- `builder/build_manager.py` - EAS build execution
+- `builder/app.py` - Flask routes and server
+- `builder/main.py` - Entry point
+- `builder/templates/base.html` - Base template
+- `builder/templates/index.html` - Build UI
+- `builder/templates/setup.html` - First-run EXPO_TOKEN setup
+- `builder/templates/settings.html` - Settings page
+- `builder/static/style.css` - CSS styles
+- `builder/static/app.js` - JavaScript utilities
+- `START-BUILDER.bat` - Launcher script
 
 ---
 

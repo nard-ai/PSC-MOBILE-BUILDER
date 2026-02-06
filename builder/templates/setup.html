@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Setup - PSC Mobile Builder{% endblock %}
+
+{% block content %}
+<div class="setup-container">
+    <div class="setup-card">
+        <h2>Welcome to PSC Mobile Builder</h2>
+        <p class="setup-intro">
+            Before you can build Android apps, you need to configure your Expo access token.
+        </p>
+
+        <div class="setup-steps">
+            <h3>How to get your EXPO_TOKEN:</h3>
+            <ol>
+                <li>Go to <a href="https://expo.dev/accounts/[account]/settings/access-tokens" target="_blank">expo.dev Account Settings</a></li>
+                <li>Click "Create Token"</li>
+                <li>Give it a name (e.g., "PSC Builder")</li>
+                <li>Copy the generated token</li>
+                <li>Paste it below</li>
+            </ol>
+        </div>
+
+        <form id="tokenForm" class="token-form">
+            <div class="form-group">
+                <label for="expo_token">EXPO_TOKEN:</label>
+                <input type="password" 
+                       id="expo_token" 
+                       name="expo_token" 
+                       placeholder="Paste your Expo access token here"
+                       required>
+                <button type="button" class="btn-toggle-password" onclick="togglePassword()">Show</button>
+            </div>
+
+            <div id="tokenError" class="error-message" style="display: none;"></div>
+            <div id="tokenSuccess" class="success-message" style="display: none;"></div>
+
+            <button type="submit" class="btn btn-primary btn-lg">
+                Save Token & Continue
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    const input = document.getElementById('expo_token');
+    const btn = event.target;
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+    } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+    }
+}
+
+document.getElementById('tokenForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const token = document.getElementById('expo_token').value.trim();
+    const errorDiv = document.getElementById('tokenError');
+    const successDiv = document.getElementById('tokenSuccess');
+    
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+    
+    if (!token) {
+        errorDiv.textContent = 'Please enter your EXPO_TOKEN';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/save-token', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({token: token})
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            successDiv.textContent = 'Token saved! Redirecting...';
+            successDiv.style.display = 'block';
+            setTimeout(() => window.location.href = '/', 1500);
+        } else {
+            errorDiv.textContent = data.error || 'Failed to save token';
+            errorDiv.style.display = 'block';
+        }
+    } catch (err) {
+        errorDiv.textContent = 'Error: ' + err.message;
+        errorDiv.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

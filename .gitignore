@@ -53,3 +53,11 @@ runtime/
 
 # Build outputs
 builds/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Builder config (contains user token)
+builder_config.json
